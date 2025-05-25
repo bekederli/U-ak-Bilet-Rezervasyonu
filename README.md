@@ -1,1 +1,157 @@
 # U-ak-Bilet-Rezervasyonu
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
+
+public class Main {
+
+    // ENTITY SINIFLARI
+
+    static class Airplane {
+        int id;
+        String model;
+        String brand;
+        String serial;
+        int capacity;
+
+        public Airplane(int id, String model, String brand, String serial, int capacity) {
+            this.id = id;
+            this.model = model;
+            this.brand = brand;
+            this.serial = serial;
+            this.capacity = capacity;
+        }
+
+        public String toString() {
+            return brand + " " + model + " (" + serial + ") - Kapasite: " + capacity;
+        }
+    }
+
+    static class Location {
+        int id;
+        String country;
+        String city;
+        String airport;
+        boolean active;
+
+        public Location(int id, String country, String city, String airport, boolean active) {
+            this.id = id;
+            this.country = country;
+            this.city = city;
+            this.airport = airport;
+            this.active = active;
+        }
+
+        public String toString() {
+            return city + " - " + airport + (active ? " [AKTİF]" : " [PASİF]");
+        }
+    }
+
+    static class Flight {
+        int id;
+        Location location;
+        Airplane airplane;
+        LocalDateTime dateTime;
+        int reservedSeats = 0;
+
+        public Flight(int id, Location location, Airplane airplane, LocalDateTime dateTime) {
+            this.id = id;
+            this.location = location;
+            this.airplane = airplane;
+            this.dateTime = dateTime;
+        }
+
+        public boolean hasSeats() {
+            return reservedSeats < airplane.capacity;
+        }
+
+        public void reserveSeat() {
+            reservedSeats++;
+        }
+
+        public String toString() {
+            return "Uçuş ID: " + id + "\n" +
+                    "Tarih: " + dateTime + "\n" +
+                    "Lokasyon: " + location + "\n" +
+                    "Uçak: " + airplane + "\n" +
+                    "Rezerve Koltuk: " + reservedSeats + "/" + airplane.capacity + "\n";
+        }
+    }
+
+    static class Reservation {
+        int id;
+        Flight flight;
+        String name;
+        String surname;
+        int age;
+
+        public Reservation(int id, Flight flight, String name, String surname, int age) {
+            this.id = id;
+            this.flight = flight;
+            this.name = name;
+            this.surname = surname;
+            this.age = age;
+        }
+
+        public String toString() {
+            return "Rezervasyon ID: " + id + " | " + name + " " + surname + " | Yaş: " + age + "\n" + flight;
+        }
+    }
+
+    // VERİ VE İŞLEM
+
+    static List<Reservation> reservations = new ArrayList<>();
+    static int reservationId = 1;
+
+    public static void main(String[] args) {
+        Scanner input = new Scanner(System.in);
+
+        Airplane airplane = new Airplane(1, "737", "Boeing", "B123", 2);
+        Location location = new Location(1, "Türkiye", "İstanbul", "IST", true);
+        Flight flight = new Flight(1, location, airplane, LocalDateTime.now().plusDays(1));
+
+        List<Flight> flights = new ArrayList<>();
+        flights.add(flight);
+
+        System.out.println("=== Uçuş Listesi ===");
+        for (Flight f : flights) {
+            System.out.println(f);
+        }
+
+        System.out.print("Uçuş ID seçiniz: ");
+        int flightId = input.nextInt();
+        input.nextLine(); // dummy
+
+        Flight selected = null;
+        for (Flight f : flights) {
+            if (f.id == flightId) {
+                selected = f;
+                break;
+            }
+        }
+
+        if (selected == null) {
+            System.out.println("Geçersiz uçuş ID!");
+            return;
+        }
+
+        if (!selected.hasSeats()) {
+            System.out.println("Uçakta boş koltuk yok!");
+            return;
+        }
+
+        System.out.print("Adınız: ");
+        String name = input.nextLine();
+        System.out.print("Soyadınız: ");
+        String surname = input.nextLine();
+        System.out.print("Yaşınız: ");
+        int age = input.nextInt();
+
+        selected.reserveSeat();
+        Reservation r = new Reservation(reservationId++, selected, name, surname, age);
+        reservations.add(r);
+
+        System.out.println("\n✅ Rezervasyon Başarılı!\n" + r);
+    }
+}
